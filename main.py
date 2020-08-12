@@ -67,19 +67,19 @@ files = getPartions(data=data_path)
 
 missing_array_map = ['',9.99,99.99,999.99,9999.99] #missing indicators
 
-df = gen_schema(scSpark,files)
+df = gen_schema(scSpark,files).cache()
 #loop through items that is not permissible and filter df systematically
-for col_name in df.schema.names:
-    for missing in missing_array_map:
-        df = df.filter((df[col_name] != missing))
+df = df.na.drop()
+df=df.filter(df.SNDP != 999.9)
+df=df.filter(df.WBAN != 9999.9)
+df=df.filter(df.SLP != 9999.9)
 
 station_df = scSpark.read.csv(station_file, header= True,sep=',').cache()
 country_df = scSpark.read.csv(country_file, header= True,sep=',').cache()
-df.explain()
 df = df.withColumnRenamed("STN---", "STN_NO") #rename colomn for join
 df_comb = station_df.join(country_df, on=['COUNTRY_ABBR'], how='inner').drop('COUNTRY_ABBR').cache()
 df_comb = df.join(df_comb, on=['STN_NO'], how='inner').cache()
-
+df_comb.show()
 #data should be enough to ask questions to now, but had no time to complete the questions.
 
 
