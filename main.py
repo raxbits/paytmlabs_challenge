@@ -75,7 +75,8 @@ for col_name in df.schema.names:
 
 station_df = scSpark.read.csv(station_file, header= True,sep=',').cache()
 country_df = scSpark.read.csv(country_file, header= True,sep=',').cache()
-df = df.selectExpr("STN--- as STN_NO") #rename colomn for join
+df.explain()
+df = df.withColumnRenamed("STN---", "STN_NO") #rename colomn for join
 df_comb = station_df.join(country_df, on=['COUNTRY_ABBR'], how='inner').drop('COUNTRY_ABBR').cache()
 df_comb = df.join(df_comb, on=['STN_NO'], how='inner').cache()
 
